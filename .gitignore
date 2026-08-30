@@ -278,3 +278,6 @@ UnreliableTestReport.csv
 /.tools/
 src/.dotnet/
 src/.tools/
+
+# Local scratch (temporary probe / e2e projects, git-ignored)
+/tmp/

@@ -1,0 +1,3 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Shadow: prevents the WinUI repo-root / Samples Directory.Build.targets from being imported. -->
+</Project>

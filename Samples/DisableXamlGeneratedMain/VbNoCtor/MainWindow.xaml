@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="DisableXamlGeneratedMainNoCtorVb.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="DisableXamlGeneratedMainNoCtorVb">
+
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <TextBlock AutomationProperties.Name="MainWindowTextBlock" Text="MainWindow" />
+            <TextBlock x:Name="entryPointTextBlock" AutomationProperties.Name="EntryPointTextBlock" />
+        </StackPanel>
+    </Grid>
+</Window>

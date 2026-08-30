@@ -20,9 +20,29 @@ Option Explicit On
 
 Namespace <#=Globalize(Model.CodeInfo.ClassName.Namespace)#>
 
-    Partial Class <#=Model.CodeInfo.ClassName.ShortName#>
-<# if (!Model.CodeInfo.IsApplication)#>
+<# if (Model.CodeInfo.IsApplication) #>
 <# {#>
+<#     bool hasParameterlessCtor = true; #>
+<#     var appClassType = Model.CodeInfo.ClassType; #>
+<#     if (appClassType != null && appClassType.UnderlyingType != null) #>
+<#     { #>
+<#         var ctor = appClassType.UnderlyingType.GetConstructor(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, System.Type.EmptyTypes, null); #>
+<#         hasParameterlessCtor = ctor != null; #>
+<#     } #>
+    Partial Class <#=Model.CodeInfo.ClassName.ShortName#>
+<#     if (hasParameterlessCtor) #>
+<#     { #>
+#If DISABLE_XAML_GENERATED_MAIN Then
+        Private Shared Sub _XamlGeneratedCreateApplicationInstance()   ' 实现部分不带 Partial（带 Partial 报 BC31433）；与 AppPass1 的声明部分配对
+            Dim _application As New <#=Model.CodeInfo.ClassName.ShortName#>()   ' VB 禁止裸 New 语句（BC30035）
+        End Sub
+#End If
+<#     } #>
+    End Class
+<# }#>
+<# else #>
+<# {#>
+    Partial Class <#=Model.CodeInfo.ClassName.ShortName#>
         Implements <#=Globalize(KnownNamespaces.XamlMarkup)#>.IComponentConnector
 
 <#      if (Model.CodeInfo.HasBindingSetters) #>
@@ -60,8 +80,8 @@ Namespace <#=Globalize(Model.CodeInfo.ClassName.Namespace)#>
 <#      Output_GetBindingConnectorMethod();  #>
 <#      Output_ApiInformationDeclarations();  #>
 <#      Output_InitializeXProperties(); #>
-<# }#>
     End Class
+<# }#>
 
 End Namespace
 

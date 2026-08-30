@@ -19,21 +19,46 @@ Option Explicit On
 Namespace <#=Globalize(Model.CodeInfo.ClassName.Namespace)#>
 
 #If Not DISABLE_XAML_GENERATED_MAIN Then
-Public Class Program
+Public Module Program
 
-    <MTAThread()> _
+    ' 不写线程模型特性：VB 编译器对编译入口点合成注入 STAThreadAttribute，默认即 STA（Roslyn SourceMethodSymbol.vb:1438-1456）
     <#=GeneratedCodeAttribute#>
     <#=DebuggerNonUserCodeAttribute#>
-    Shared Sub Main(ByVal args() As String)
-        <#=Globalize(KnownNamespaces.Xaml)#>.Application.Start(Function(p) New Global.<#=Model.CodeInfo.ClassName.FullName#>())
+    Sub Main(ByVal args() As String)   ' Module 成员隐式 Shared，不写 Shared
+<#  WriteCommonInit(); #>
+        <#=Globalize(KnownNamespaces.Xaml)#>.Application.Start(
+            Sub(p)
+<#  if (ProjectInfo.UsingCSWinRT) { #>
+                Dim context As New Global.Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(
+                    Global.Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread())
+                Global.System.Threading.SynchronizationContext.SetSynchronizationContext(context)
+<#  } #>
+                Dim _application As New Global.<#=Model.CodeInfo.ClassName.FullName#>()
+            End Sub)
     End Sub
+
+End Module
+#End If
+
+#If DISABLE_XAML_GENERATED_MAIN Then
+Friend Module XamlGeneratedProgram
 
     <#=GeneratedCodeAttribute#>
     <#=DebuggerNonUserCodeAttribute#>
-    Sub Program
+    Sub XamlGeneratedMain()   ' 与 Sub Main 共享同一段初始化；Start lambda 内改调 App.XamlGeneratedCreateApplicationInstance()
+<#  WriteCommonInit(); #>
+        <#=Globalize(KnownNamespaces.Xaml)#>.Application.Start(
+            Sub(p)
+<#  if (ProjectInfo.UsingCSWinRT) { #>
+                Dim context As New Global.Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(
+                    Global.Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread())
+                Global.System.Threading.SynchronizationContext.SetSynchronizationContext(context)
+<#  } #>
+                Global.<#=Model.CodeInfo.ClassName.FullName#>.XamlGeneratedCreateApplicationInstance()
+            End Sub)
     End Sub
 
-End Class
+End Module
 #End If
 
 
@@ -43,6 +68,18 @@ Partial Class <#=Model.CodeInfo.ClassName.ShortName#>
 
     <#=GeneratedCodeAttribute#>
     Private _contentLoaded As Boolean
+
+#If DISABLE_XAML_GENERATED_MAIN Then
+    <#=GeneratedCodeAttribute#>
+    <#=DebuggerNonUserCodeAttribute#>
+    Friend Shared Sub XamlGeneratedCreateApplicationInstance()   ' 外层：镜像 C# internal static（CSharpAppPass1.tt:81）
+        _XamlGeneratedCreateApplicationInstance()
+    End Sub
+    <#=GeneratedCodeAttribute#>
+    <#=DebuggerNonUserCodeAttribute#>
+    Private Shared Partial Sub _XamlGeneratedCreateApplicationInstance()   ' 内层：声明，镜像 C# private static partial（:88）；实体由 PagePass2 IsApplication 分支补
+    End Sub
+#End If
 <# if((!ProjectInfo.GenerateProviderCode) && (!ProjectInfo.EnableTypeInfoReflection))#>
 <# {#>
 
@@ -86,4 +123,15 @@ Partial Class <#=Model.CodeInfo.ClassName.ShortName#>
 End Class
 
 End Namespace
-<#+ #>
+<#+     private void WriteCommonInit() #>
+<#+     { #>
+<#+         if (ProjectInfo.UsingCSWinRT) { #>
+        Global.WinRT.ComWrappersSupport.InitializeComWrappers()
+<#+         } #>
+<#+         foreach (var change in ProjectInfo.EnabledXamlOptionalChanges) { #>
+        <#=Globalize(KnownTypes.XamlOptionalChanges)#>.EnableChange(<#= int.TryParse(change, out _) ? $"CType({change}, {Globalize(KnownTypes.XamlChangeId)})" : $"{Globalize(KnownTypes.XamlChangeId)}.{change}" #>)
+<#+         } #>
+<#+         foreach (var change in ProjectInfo.DisabledXamlOptionalChanges) { #>
+        <#=Globalize(KnownTypes.XamlOptionalChanges)#>.DisableChange(<#= int.TryParse(change, out _) ? $"CType({change}, {Globalize(KnownTypes.XamlChangeId)})" : $"{Globalize(KnownTypes.XamlChangeId)}.{change}" #>)
+<#+         } #>
+<#+     } #>

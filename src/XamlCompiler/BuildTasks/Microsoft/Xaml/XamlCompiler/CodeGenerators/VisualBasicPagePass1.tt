@@ -95,7 +95,15 @@ End Namespace
 <#+         foreach (FieldDefinition fieldData in Model.CodeInfo.FieldDeclarations) #>
 <#+         { #>
         <#=GeneratedCodeAttribute#>
+<#+         if (fieldData.IsValueType) #>
+<#+         { #>
+        ' 值类型不支持 WithEvents，已输出普通字段
+        <#=fieldData.FieldModifier#> <#=fieldData.FieldName#> As <#=Globalize(fieldData.FieldTypeName)#>
+<#+         } #>
+<#+         else #>
+<#+         { #>
         <#=fieldData.FieldModifier#> WithEvents <#=fieldData.FieldName#> As <#=Globalize(fieldData.FieldTypeName)#>
+<#+         } #>
 <#+         } #>
 <#+     } #>
 

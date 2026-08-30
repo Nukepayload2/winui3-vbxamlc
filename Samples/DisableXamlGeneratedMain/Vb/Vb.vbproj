@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <!-- Offline cache only has Microsoft.Windows.SDK.NET.Ref 10.0.26100.38; the SDK default for a
+         19041 TFM is 10.0.19041.57 which is NOT in the global cache, so pin it explicitly. -->
+    <WindowsSdkPackageVersion>10.0.26100.38</WindowsSdkPackageVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>DisableXamlGeneratedMainVb</RootNamespace>
+    <AssemblyName>DisableXamlGeneratedMainVb</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU'">x64</Platform>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <!-- Deploy the WinUI native runtime alongside the app (the Windows App Runtime MSIX framework
+         package is NOT installed on this machine, so framework-dependent bootstrap would fail). -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+
+    <!-- DISABLE_XAML_GENERATED_MAIN: the user supplies their own Sub Main (Program.vb) which
+         delegates to the generated XamlGeneratedProgram.XamlGeneratedMain() startup helper.
+         (Overwritten, not appended, because Nukepayload2.UI.VBWinUI3.props already appends a
+         comma-form constant that would otherwise produce a malformed /define -> BC31030.) -->
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+
+    <!-- Use the in-repo modified XamlCompiler (P1/P2: the VB DISABLE contract emits the
+         XamlGeneratedProgram.XamlGeneratedMain() helper and the two-layer App
+         XamlGeneratedCreateApplicationInstance hooks). The stock compiler inside the
+         Microsoft.WindowsAppSDK nuget package does NOT emit this for VB, so point the build at
+         the repo's local packaging output (BuildOutput\packaging\Release\tools). -->
+    <XamlCompilerTaskPath>$(MSBuildThisFileDirectory)..\..\..\BuildOutput\packaging\Release\tools\net8.0\Microsoft.UI.Xaml.Markup.Compiler.dll</XamlCompilerTaskPath>
+    <XamlCompilerJsonTaskPath>$(MSBuildThisFileDirectory)..\..\..\BuildOutput\packaging\Release\tools\net8.0\Microsoft.UI.Xaml.Markup.Compiler.IO.dll</XamlCompilerJsonTaskPath>
+    <XamlCompilerExePath>$(MSBuildThisFileDirectory)..\..\..\BuildOutput\packaging\Release\tools\net472\XamlCompiler.exe</XamlCompilerExePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Microsoft.Windows.SDK.NET.Ref is a DotnetPlatform package: it must be referenced as a
+         FrameworkReference (a plain PackageReference raises NU1213). The .NET SDK's implicit
+         reference does NOT add it for WindowsSdkPackageVersion Revision>34 on this TFM, so add it
+         explicitly; FrameworkReference resolution honors $(WindowsSdkPackageVersion)=10.0.26100.38
+         (the exact version present in the offline global cache). Provides WinRT.Runtime
+         (WinRT.ComWrappersSupport) + the Windows SDK projections (Microsoft.Windows.SDK.NET.dll). -->
+    <FrameworkReference Include="Microsoft.Windows.SDK.NET.Ref" />
+    <!-- Stock WinUI 3 XAML compiler sub-packages are resolved from the offline global cache via
+         the meta package; the local XamlCompiler override above replaces only the generator. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+    <!-- User-maintained VB WinUI3 build support: defines DISABLE_XAML_GENERATED_MAIN, sets
+         VBRuntime=None for XamlPreCompile, and supplies the VB UndockedRegFreeWinRTAutoInitializer
+         for self-contained deployment. -->
+    <PackageReference Include="Nukepayload2.UI.VBWinUI3" Version="0.9.4-beta" />
+  </ItemGroup>
+</Project>

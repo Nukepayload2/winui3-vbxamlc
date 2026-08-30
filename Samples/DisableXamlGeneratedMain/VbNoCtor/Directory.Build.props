@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Shadow: prevents the WinUI repo-root / Samples Directory.Build.props from being imported
+       (MSBuild imports the FIRST Directory.Build.props found walking up from the project dir),
+       so this VB sample builds as a standard, isolated .NET SDK project (project-local obj/bin).
+       The local modified XamlCompiler override is declared directly in VbNoCtor.vbproj.
+       Mirrors tmp\p0-3\Directory.Build.props. -->
+</Project>

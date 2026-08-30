@@ -50,7 +50,7 @@ namespace Microsoft.UI.Xaml.Markup.Compiler
                     () => modifier.ToLower(),
                     () => modifier.ToLower(),
                     () => modifier.ToLower(),
-                    () => modifier.ToTitleCase()
+                    () => modifier == "internal" ? "Friend" : modifier.ToTitleCase()   // VB
                     );
             }
         }
@@ -82,7 +82,12 @@ namespace Microsoft.UI.Xaml.Markup.Compiler
             if (fieldModifierMember != null)
             {
                 string modifier = DomHelper.GetStringValueOfProperty(fieldModifierMember);
-                _fieldModifier = new LanguageSpecificString(() => modifier);
+                _fieldModifier = new LanguageSpecificString(
+                    () => modifier,                                    // CppCX
+                    () => modifier,                                    // CppWinRT
+                    () => modifier,                                    // CSharp - keep lowercase
+                    () => modifier == "internal" ? "Friend" : modifier.ToTitleCase()   // VB
+                    );
             }
         }
 
@@ -96,7 +101,7 @@ namespace Microsoft.UI.Xaml.Markup.Compiler
                         () => "private",
                         () => "protected",
                         () => "private",
-                        () => "private");
+                        () => "Private");
                 }
                 return _fieldModifier;
             }

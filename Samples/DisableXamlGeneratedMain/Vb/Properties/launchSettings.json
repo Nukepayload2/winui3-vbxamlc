@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "DisableXamlGeneratedMainVb (Package)": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": true
+    },
+    "DisableXamlGeneratedMainVb (Unpackaged)": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
