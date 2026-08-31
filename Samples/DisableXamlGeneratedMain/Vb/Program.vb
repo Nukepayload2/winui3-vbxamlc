@@ -14,7 +14,7 @@ Partial Module Program
     ' No thread-model attribute here on purpose: the VB compiler synthesizes
     ' STAThreadAttribute on the compiled entry point (Roslyn SourceMethodSymbol.vb
     ' AddSynthesizedAttributes), so the entry thread is STA.
-    Sub Main(ByVal args() As String)
+    Sub Main(args() As String)
         ' Delegate to the generated startup helper (mirrors Cs Program.cs:16).
         Global.DisableXamlGeneratedMainVb.XamlGeneratedProgram.XamlGeneratedMain()
     End Sub

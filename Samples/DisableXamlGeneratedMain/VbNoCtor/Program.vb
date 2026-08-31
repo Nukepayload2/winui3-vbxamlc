@@ -14,7 +14,7 @@ Partial Module Program
 
     ' No thread-model attribute here on purpose: the VB compiler synthesizes
     ' STAThreadAttribute on the compiled entry point, so the entry thread is STA.
-    Sub Main(ByVal args() As String)
+    Sub Main(args() As String)
         Global.WinRT.ComWrappersSupport.InitializeComWrappers()
         Microsoft.UI.Xaml.Application.Start(
             Sub(p)
