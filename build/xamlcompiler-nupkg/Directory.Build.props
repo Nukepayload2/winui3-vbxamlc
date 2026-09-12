@@ -1,0 +1,8 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Shadow: prevents the WinUI repo-root Directory.Build.props from being imported
+       (MSBuild imports the FIRST Directory.Build.props found walking up from the project dir),
+       so this packaging-only project builds as a standard, isolated .NET SDK project.
+       The repo-root file would set IsInWinUIRepo=true and pull in eng\common.props /
+       configuration.props / versions.props, none of which a plain `dotnet pack` can satisfy.
+       Mirrors Samples\DisableXamlGeneratedMain\Vb\Directory.Build.props. -->
+</Project>

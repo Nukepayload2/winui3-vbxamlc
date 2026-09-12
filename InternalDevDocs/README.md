@@ -7,7 +7,7 @@
 | 路径 | 用途 |
 |------|------|
 | `xaml-compiler-index.md` | XAML 编译器源码地图（轻量索引），引用编译器源码的唯一起点 |
-| `decisions.md` | 维护决策账本（编号决策，唯一权威）——首个决策落地时建立 |
+| `decisions.md` | 维护决策账本（编号决策，唯一权威） |
 | `proposals\` | 特性提案（`proposal-<slug>.md`，六节模板） |
 | `meetings\` | 提案评审会议纪要（`meeting-<slug>.md`，与提案 1:1） |
 | `tasks\<slug>\` | 任务计划（README + design-overview + design-detailed + test-plan） |

@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Shadow: prevents the WinUI repo-root Directory.Build.targets from being imported
+       (MSBuild imports the FIRST Directory.Build.targets found walking up from the project dir),
+       so eng\binplace.targets / eng\packaging.targets / eng\usexamlcompiler.targets do not run
+       for this packaging-only project.
+       Mirrors Samples\DisableXamlGeneratedMain\Vb\Directory.Build.targets. -->
+</Project>

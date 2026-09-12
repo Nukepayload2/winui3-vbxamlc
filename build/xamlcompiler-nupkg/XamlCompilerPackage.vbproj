@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Packages only the XAML compiler binaries. The stock Windows App SDK package keeps providing
+       the targets, genxbf and the reference assemblies.
+       Pack with: pack.cmd -->
+  <PropertyGroup>
+    <PackageId>Nukepayload2.UI.VBWinUI3.XamlCompiler</PackageId>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">3.0.0-dev</PackageVersion>
+    <Authors>Nukepayload2</Authors>
+    <Description>Custom WinUI 3 XAML compiler (VB code generator fixes) as a drop-in replacement for the stock Microsoft.WindowsAppSDK.WinUI tools.</Description>
+    <PackageTags>winui;xaml;compiler;visualbasic;vb;msbuild</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Nukepayload2/winui3-vbxamlc</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Nukepayload2.UI.VBWinUI3.XamlCompiler.Packaging</RootNamespace>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>On</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <!-- NU5100: assemblies in tools\. NU5128: no lib/ref group. -->
+    <NoWarn>$(NoWarn);NU5100;NU5128</NoWarn>
+    <!-- Keeps the packaged layout on Release regardless of $(Configuration). -->
+    <XamlCompilerLayoutConfiguration Condition="'$(XamlCompilerLayoutConfiguration)' == ''">Release</XamlCompilerLayoutConfiguration>
+    <XamlCompilerToolsLayout>$(MSBuildThisFileDirectory)..\..\BuildOutput\packaging\$(XamlCompilerLayoutConfiguration)\tools\</XamlCompilerToolsLayout>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(XamlCompilerToolsLayout)net8.0\**"
+             PackagePath="tools\net8.0\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Content Include="$(XamlCompilerToolsLayout)net472\**"
+             PackagePath="tools\net472\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Content Include="$(XamlCompilerToolsLayout)NOTICE.txt" PackagePath="tools\NOTICE.txt" />
+    <Content Include="Nukepayload2.UI.VBWinUI3.XamlCompiler.props"
+             PackagePath="buildTransitive\Nukepayload2.UI.VBWinUI3.XamlCompiler.props" />
+    <Content Include="readme.md" PackagePath="readme.md" />
+  </ItemGroup>
+
+  <Target Name="_VerifyXamlCompilerLayout" BeforeTargets="GenerateNuspec">
+    <Error Condition="!Exists('$(XamlCompilerToolsLayout)net8.0\Microsoft.UI.Xaml.Markup.Compiler.dll')"
+           Text="XAML compiler layout missing: $(XamlCompilerToolsLayout). Build the compiler in Release first." />
+    <Error Condition="!Exists('$(XamlCompilerToolsLayout)net472\XamlCompiler.exe')"
+           Text="XAML compiler layout missing: $(XamlCompilerToolsLayout). Build the compiler in Release first." />
+  </Target>
+
+</Project>

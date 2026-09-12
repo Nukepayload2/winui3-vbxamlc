@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Points the three XAML compiler tool paths at this package's tools\. NuGet imports this file
+       through obj\$(MSBuildProjectFile).nuget.g.props, which runs before the empty-value guards in
+       the stock Microsoft.UI.Xaml.Markup.Compiler.interop.targets.
+       Set VBWinUI3XamlCompilerEnabled=false to use the stock compiler instead.
+       Do not set UseXamlCompilerExecutable here; the stock targets reject it under desktop MSBuild. -->
+  <PropertyGroup Condition="'$(VBWinUI3XamlCompilerEnabled)' != 'false'">
+    <_VBWinUI3XamlCompilerToolsDir>$(MSBuildThisFileDirectory)..\tools\net472\</_VBWinUI3XamlCompilerToolsDir>
+    <_VBWinUI3XamlCompilerToolsDir Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net8.0\</_VBWinUI3XamlCompilerToolsDir>
+
+    <XamlCompilerTaskPath>$(_VBWinUI3XamlCompilerToolsDir)Microsoft.UI.Xaml.Markup.Compiler.dll</XamlCompilerTaskPath>
+    <XamlCompilerJsonTaskPath>$(_VBWinUI3XamlCompilerToolsDir)Microsoft.UI.Xaml.Markup.Compiler.IO.dll</XamlCompilerJsonTaskPath>
+    <XamlCompilerExePath>$(MSBuildThisFileDirectory)..\tools\net472\XamlCompiler.exe</XamlCompilerExePath>
+  </PropertyGroup>
+
+  <Target Name="_VBWinUI3XamlCompilerReport" BeforeTargets="MarkupCompilePass1"
+          Condition="'$(VBWinUI3XamlCompilerEnabled)' != 'false'">
+    <Message Condition="'$(VBWinUI3XamlCompilerReport)' != 'false'" Importance="high"
+             Text="VBWinUI3 XamlCompiler override active: CompileXaml=$(XamlCompilerTaskPath) ; Json=$(XamlCompilerJsonTaskPath) ; Exe=$(XamlCompilerExePath)" />
+    <Error Condition="!Exists('$(XamlCompilerTaskPath)')" Text="XamlCompiler override failed, file not found: $(XamlCompilerTaskPath)" />
+    <Error Condition="!Exists('$(XamlCompilerJsonTaskPath)')" Text="XamlCompiler override failed, file not found: $(XamlCompilerJsonTaskPath)" />
+    <Error Condition="!Exists('$(XamlCompilerExePath)')" Text="XamlCompiler override failed, file not found: $(XamlCompilerExePath)" />
+  </Target>
+</Project>
