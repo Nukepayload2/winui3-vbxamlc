@@ -27,7 +27,7 @@
 |------|------|
 | `obj\BatchFfmpegWinUI.vbproj.nuget.g.props` 含本包 props 的 Import | 第 17 行 |
 | 该行早于原厂 `Microsoft.WindowsAppSDK.WinUI.props` 的 Import 行 | 17 < 23 |
-| `project.assets.json` 解析到 `Nukepayload2.UI.VBWinUI3.XamlCompiler/3.0.0-dev` | 命中 |
+| `project.assets.json` 解析到 `Nukepayload2.UI.VBWinUI3.XamlCompiler/3.0.0-dev.260913.1` | 命中 |
 | 还原源含本地 `vbxamlc\PackageStore`（submodule） | 命中 |
 
 ## E6 构建

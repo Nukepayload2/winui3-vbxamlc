@@ -24,7 +24,7 @@ assignments win.
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Nukepayload2.UI.VBWinUI3.XamlCompiler" Version="3.0.0-dev" />
+  <PackageReference Include="Nukepayload2.UI.VBWinUI3.XamlCompiler" Version="3.0.0-dev.260913.1" />
 </ItemGroup>
 ```
 
@@ -62,13 +62,13 @@ build\xamlcompiler-nupkg\pack.cmd
 ```
 
 `~\.nuget\packages\<id>\<version>` is immutable to NuGet, so a repacked version is ignored in favour
-of the cached copy. Bump the version (`pack.cmd -p:PackageVersion=3.0.0-dev.1`) or delete the cached
-folder and restore again.
+of the cached copy. Bump the version (`pack.cmd -p:PackageVersion=3.0.0-dev.260913.2`) or delete the
+cached folder and restore again.
+
+Releases use the pre-release line `3.0.0-dev.<yyMMdd>.<n>` (numbers without leading zeros, so
+`3.0.0-dev.260913.1` is valid and `3.0.0-dev.260913.001` is not); the stable line will be `3.0.0`.
 
 ## Differences from the stock tools
 
 - The Core-MSBuild tool folder is `tools\net8.0\` instead of `tools\net6.0\`; the file names are the
   same.
-- Only the three binaries above are replaced. The fork's `interop.targets` also passes
-  `EnabledXamlOptionalChanges` / `DisabledXamlOptionalChanges`; that file is not shipped, so those
-  properties stay empty (their default), which only affects the C#/C++ generators.

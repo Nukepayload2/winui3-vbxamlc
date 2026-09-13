@@ -42,7 +42,8 @@ Nukepayload2.UI.VBWinUI3.XamlCompiler.nuspec   （无 <dependencies>）
 ## 3. 与原厂的差异
 
 - Core 工具目录名 `net8.0`（原厂 `net6.0`），文件集合逐名相同（7 / 19）。
-- fork 的 `interop.targets` 多 `EnabledXamlOptionalChanges` / `DisabledXamlOptionalChanges` 透传。本包不发该文件（继续用原厂那份），这两个属性保持空值默认；只有 C#/C++ 生成器读它们，VB 生成器不读。fork 参数面是原厂严格超集，多传未知参数会硬报 `MSB4064`。
+
+非差异（仅记录，不进上面的差异清单）：fork 的 `interop.targets` 另多 `EnabledXamlOptionalChanges` / `DisabledXamlOptionalChanges` 透传（原厂那份 0 处引用），本包不发该文件，两属性保持空值默认，生成结果与原厂 targets 一致。该机制与语言无关：VB 模板 `VisualBasicAppPass1.tt` 的 `WriteCommonInit` 同样输出，被 `:28`（非 DISABLE）与 `:49`（DISABLE）两处入口调用。fork 参数面是原厂严格超集，多传未知参数会硬报 `MSB4064`。
 
 升级 WinUI 包后复查：
 
@@ -59,6 +60,15 @@ msbuild XamlCompilerPrerequisites.sln /p:Configuration=Release /p:Platform=x64 /
 build\xamlcompiler-nupkg\pack.cmd
 ```
 
+Core MSBuild（`dotnet build`）**不能**构建这个 sln：两个受管工程无条件 import VS 的 `$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets`（`src/XamlCompiler/Microsoft.UI.Xaml.Markup.Compiler.csproj:526`、`Exe/Microsoft.UI.Xaml.Markup.Compiler.Executable.csproj:506`），且图里含 `GenXbf.vcxproj`（需要 `$(VCTargetsPath)`）；三条都是 MSB4278。可行的 dotnet 路径 = 只构建受管工程 + 指路：
+
+```
+dotnet build src\XamlCompiler\Microsoft.UI.Xaml.Markup.Compiler.csproj -c Release -p:Platform=x64 ^
+  -p:MSBuildExtensionsPath="<VS>\MSBuild" -p:VisualStudioVersion=18.0
+```
+
+已运行：布局 `net8.0`=7 / `net472`=19、零错误。该布局打出的包与 msbuild 版文件大小相同、`ProductVersion` 相同（`3.0.0.0+<commit>`），字节不同源于两套 Roslyn；用该包构建 fork 样本 `Samples/DisableXamlGeneratedMain/Vb` 并运行通过。前提仍是装有 VS（T4 targets 由 VS 提供）。
+
 前置条件：
 
 - `eng/projectcaching.props:20` 无条件导入 `packages\$(MSBuildCachePackageName).$(ver)\build\*.props`（版本取自 `packages.config`）。该包必须以 `Id.Version` 布局存在于 `packages\`，否则求值阶段 MSB4019。
@@ -67,7 +77,7 @@ build\xamlcompiler-nupkg\pack.cmd
 
 ## 5. 下游接线
 
-1. `PackageReference`：`Microsoft.WindowsAppSDK` 2.2.0（WinUI 子包解析为 2.2.1）+ `Nukepayload2.UI.VBWinUI3.XamlCompiler` 3.0.0-dev。不加 `PrivateAssets`/`ExcludeAssets`（会连 `buildTransitive` 导入一起掐掉）。
+1. `PackageReference`：`Microsoft.WindowsAppSDK` 2.2.0（WinUI 子包解析为 2.2.1）+ `Nukepayload2.UI.VBWinUI3.XamlCompiler` 3.0.0-dev.260913.1。不加 `PrivateAssets`/`ExcludeAssets`（会连 `buildTransitive` 导入一起掐掉）。
 2. 仓库根 `nuget.config`：加本地源 `vbxamlc\PackageStore`（demo 以 submodule 形式引入本仓库，路径 `vbxamlc`），不写 `<clear/>`。submodule 内的 `PackageStore` 是 git-ignored，clone 后需先打包；submodule 不在该位置时用 `dotnet restore -p:RestoreAdditionalProjectSources=<绝对路径>`，不要用裸 `--source`（会替换全部源）。
 3. 入口点由编译器生成（`Public Module Program` + `Sub Main`），不需要 `Program.vb`。只有要手写入口点时才定义 `DISABLE_XAML_GENERATED_MAIN` 并调用生成的 `XamlGeneratedProgram.XamlGeneratedMain()`。追加 `DefineConstants` 时用快照写法：直接写 `$(DefineConstants),X` 会产生前导逗号（`FinalDefineConstants` 空常量名 → BC31030），两行同测 `$(DefineConstants)` 则会把常量加两次。
 

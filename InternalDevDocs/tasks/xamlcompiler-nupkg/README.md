@@ -16,7 +16,7 @@
 | `build/xamlcompiler-nupkg/Nukepayload2.UI.VBWinUI3.XamlCompiler.props` | 覆盖载荷，随包发到 `buildTransitive\` |
 | `build/xamlcompiler-nupkg/pack.cmd` | `dotnet pack -c Release -o ..\..\PackageStore` |
 | `build/xamlcompiler-nupkg/readme.md` | 随包分发的使用说明 |
-| `PackageStore/Nukepayload2.UI.VBWinUI3.XamlCompiler.3.0.0-dev.nupkg` | 产物，`PackageStore` 为 git-ignored |
+| `PackageStore/Nukepayload2.UI.VBWinUI3.XamlCompiler.3.0.0-dev.260913.1.nupkg` | 产物，`PackageStore` 为 git-ignored |
 
 ## 判据与结果（已运行）
 
@@ -39,7 +39,7 @@
 1. 交付机制 = 仅编译器 nupkg。整包路线要求 `build/nuspecs/Microsoft.WindowsAppSDK.WinUI.nuspec:34-62` 的 `runtimes-framework/**`、`lib/**`、`include/**`，需先全量构建整个仓库，排除。
 2. 只覆盖 `XamlCompilerTaskPath` / `XamlCompilerJsonTaskPath` / `XamlCompilerExePath`，不带空值守卫；`_MuxPackageToolsFolder`、`GenXbfPath`、`XamlCompilerPropsAndTargetsDirectory` 不动；不设 `UseXamlCompilerExecutable`（`interop.targets:375-376`）。
 3. 只发 `buildTransitive\`；同时发 `build\` 会在直连引用时重复导入（MSB4011）。
-4. 包 id `Nukepayload2.UI.VBWinUI3.XamlCompiler`，默认版本 `3.0.0-dev`，可用 `-p:PackageVersion=` 覆盖。
+4. 包 id `Nukepayload2.UI.VBWinUI3.XamlCompiler`；工程内默认版本是本地占位 `3.0.0-dev.0`，发布与本地迭代都用 `-p:PackageVersion=3.0.0-dev.<yyMMdd>.<n>` 显式指定（数字不带前导零）；稳定线为 `3.0.0`。已发布的 `3.0.0-dev` 不可复用。
 5. 下游默认使用生成的入口点：不定义 `DISABLE_XAML_GENERATED_MAIN`、不手写 `Program.vb`。代价是该示例不能再用原厂编译器构建（BC30179）。
 
 ## 未覆盖

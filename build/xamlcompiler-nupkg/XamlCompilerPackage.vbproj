@@ -5,7 +5,8 @@
        Pack with: pack.cmd -->
   <PropertyGroup>
     <PackageId>Nukepayload2.UI.VBWinUI3.XamlCompiler</PackageId>
-    <PackageVersion Condition="'$(PackageVersion)' == ''">3.0.0-dev</PackageVersion>
+    <!-- Local placeholder only: releases always pass -p:PackageVersion=3.0.0-dev.<yyMMdd>.<n>. -->
+    <PackageVersion Condition="'$(PackageVersion)' == ''">3.0.0-dev.0</PackageVersion>
     <Authors>Nukepayload2</Authors>
     <Description>Custom WinUI 3 XAML compiler (VB code generator fixes) as a drop-in replacement for the stock Microsoft.WindowsAppSDK.WinUI tools.</Description>
     <PackageTags>winui;xaml;compiler;visualbasic;vb;msbuild</PackageTags>

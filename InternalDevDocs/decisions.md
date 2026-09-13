@@ -20,9 +20,9 @@ fork 的 XAML 编译器以仅编译器 nupkg（`Nukepayload2.UI.VBWinUI3.XamlCom
 
 ## D3 包身份与版本
 
-包 id `Nukepayload2.UI.VBWinUI3.XamlCompiler`，默认版本 `3.0.0-dev`（与 `Build.cmd:28`、`pack.component.cmd:9` 一致），`DevelopmentDependency=true`，MIT，只发 `buildTransitive\`。
+包 id `Nukepayload2.UI.VBWinUI3.XamlCompiler`；工程默认版本 `3.0.0-dev.0`（本地占位，永不发布），发布/迭代一律显式 `-p:PackageVersion=3.0.0-dev.<yyMMdd>.<n>`（数字标识符不带前导零，因此 `3.0.0-dev.260913.001` 非法），稳定线 `3.0.0`；`DevelopmentDependency=true`，MIT，只发 `buildTransitive\`。
 
-理由（已运行）：`~\.nuget\packages\<id>\<ver>` 对 NuGet 不可变，同版本重打被静默忽略；同时发 `build\` 会在直连引用时重复导入（MSB4011）。
+理由（已运行）：`~\.nuget\packages\<id>\<ver>` 对 NuGet 不可变，同版本重打被静默忽略；同时发 `build\` 会在直连引用时重复导入（MSB4011）。版本序用 NuGet 自己的比较器核过：`3.0.0-dev.260913.1 > 3.0.0-dev`；单标识符方案（`3.0.0-dev260913001`）不采用——数字位数一变就出现版本倒退（`dev2609130002 < dev260913001`，实测），且 `alpha` 小于 `dev`。
 
 ## D4 下游运行时问题不进编译器覆盖面
 
