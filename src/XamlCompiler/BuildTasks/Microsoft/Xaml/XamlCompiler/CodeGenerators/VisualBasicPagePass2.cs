@@ -544,12 +544,22 @@ this.Write("                    Me.RootWeakReference.TryGetTarget(rootReference)
              }
              if (element.IsBindingFileRoot)
              { 
-this.Write("                    Me.Bindings = bindings\r\n                    AddHandler ");
+this.Write("                    Me.Bindings = bindings\r\n");
+
+                 if (element.Type.IsDerivedFromWindow())
+                 { 
+this.Write("                    bindings.SubscribeToWindowActivated()\r\n");
+
+                 } 
+                 else 
+                 { 
+this.Write("                    AddHandler ");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(element.ElementCodeName));
 
 this.Write(".Loading, AddressOf bindings.Loading\r\n");
 
+                 } 
              }
              else
              {
@@ -569,7 +579,7 @@ this.Write(this.ToStringHelper.ToStringWithCulture(element.ElementCodeName));
 this.Write(", bindings)\r\n");
 
              }
-             if (ProjectInfo.ShouldGenerateDisableXBind || !element.IsBindingFileRoot) 
+             if (!element.Type.IsDerivedFromWindow() && (ProjectInfo.ShouldGenerateDisableXBind || !element.IsBindingFileRoot)) 
              {
 this.Write("                    ");
 
@@ -1493,13 +1503,22 @@ this.Write(this.ToStringHelper.ToStringWithCulture(bindUniverse.GetNextPhase(0))
 
 this.Write("\r\n                        Me.SetDataRoot(item)\r\n                        If Not re" +
         "movedDataContextHandler Then\r\n                            removedDataContextHand" +
-        "ler = True\r\n                            RemoveHandler ");
+        "ler = True\r\n                            Dim rootElement As ");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(bindUniverse.RootElement.Type.VBName()));
+
+this.Write(" = ");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(bindUniverse.RootElement.ReferenceExpression));
 
-this.Write(".DataContextChanged, AddressOf Me.DataContextChangedHandler\r\n                    " +
-        "    End If\r\n                        Me.initialized = True\r\n                     " +
-        "   Exit Select\r\n");
+this.Write(@"
+                            If rootElement IsNot Nothing Then
+                                RemoveHandler rootElement.DataContextChanged, AddressOf Me.DataContextChangedHandler
+                            End If
+                        End If
+                        Me.initialized = True
+                        Exit Select
+");
 
                      foreach(KeyValuePair<int, List<PhaseAssignment>> kvp in bindUniverse.PhaseAssignments.Where(kvp => kvp.Key != 0).OrderBy(kvp => kvp.Key)) 
                      { 
@@ -1779,6 +1798,34 @@ this.Write(")\r\n                    Return True\r\n                End If\r\n  
 
              if (bindUniverse.RootElement.IsBindingFileRoot)
              {
+                  if (bindUniverse.RootElement.Type.IsDerivedFromWindow())
+                  {
+this.Write("\r\n            Public Sub SubscribeToWindowActivated()\r\n                Dim weakBi" +
+        "ndings As New Global.System.WeakReference(Of ");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(bindUniverse.BindingsClassName));
+
+this.Write(")(Me)\r\n                AddHandler Me.dataRoot.Activated, Sub(obj As Global.System" +
+        ".Object, data As ");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.Xaml)));
+
+this.Write(".WindowActivatedEventArgs)\r\n                    Dim bindings As ");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(bindUniverse.BindingsClassName));
+
+this.Write(" = Nothing\r\n                    If weakBindings.TryGetTarget(bindings) Then\r\n    " +
+        "                    bindings.Activated(obj, data)\r\n                    End If\r\n " +
+        "               End Sub\r\n            End Sub\r\n");
+                  }
+
+this.Write("\r\n            Public Sub Activated(obj As Global.System.Object, data As ");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.Xaml)));
+
+this.Write(".WindowActivatedEventArgs)\r\n                Me.Initialize()\r\n            End Sub\r" +
+        "\n");
+
 this.Write("\r\n            Public Sub Loading(src As ");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.Xaml)));
@@ -2132,7 +2179,7 @@ this.Write("), e As Global.Windows.Foundation.Collections.IVectorChangedEventArg
 
 this.Write(this.ToStringHelper.ToStringWithCulture(bindUniverse.BindingsClassName));
 
-this.Write(" = Nothing\r\n                    If bindings IsNot Nothing Then\r\n                 " +
+this.Write(" = TryGetBindingObject()\r\n                    If bindings IsNot Nothing Then\r\n                 " +
         "       Dim obj As ");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(step.ValueType));

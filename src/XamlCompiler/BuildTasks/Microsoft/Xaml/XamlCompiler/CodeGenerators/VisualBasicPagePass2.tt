@@ -279,14 +279,21 @@ End Namespace
 <#+             if (element.IsBindingFileRoot)#>
 <#+             { #>
                     Me.Bindings = bindings
+<#+                 if (element.Type.IsDerivedFromWindow())#>
+<#+                 { #>
+                    bindings.SubscribeToWindowActivated()
+<#+                 }#>
+<#+                 else#>
+<#+                 { #>
                     AddHandler <#=element.ElementCodeName#>.Loading, AddressOf bindings.Loading
+<#+                 }#>
 <#+             }#>
 <#+             else#>
 <#+             {#>
                     AddHandler <#=element.ElementCodeName#>.DataContextChanged, AddressOf bindings.DataContextChangedHandler
                     <#=Globalize(KnownNamespaces.Xaml)#>.DataTemplate.SetExtensionInstance(<#=element.ElementCodeName#>, bindings)
 <#+             }#>
-<#+             if (ProjectInfo.ShouldGenerateDisableXBind || !element.IsBindingFileRoot) #>
+<#+             if (!element.Type.IsDerivedFromWindow() && (ProjectInfo.ShouldGenerateDisableXBind || !element.IsBindingFileRoot)) #>
 <#+             {#>
                     <#=Globalize(KnownNamespaces.XamlMarkup)#>.XamlBindingHelper.SetDataTemplateComponent(<#=element.ElementCodeName#>, bindings)
 <#+             }#>
@@ -755,7 +762,10 @@ End Namespace
                         Me.SetDataRoot(item)
                         If Not removedDataContextHandler Then
                             removedDataContextHandler = True
-                            RemoveHandler <#=bindUniverse.RootElement.ReferenceExpression#>.DataContextChanged, AddressOf Me.DataContextChangedHandler
+                            Dim rootElement As <#=bindUniverse.RootElement.Type.VBName#> = <#=bindUniverse.RootElement.ReferenceExpression#>
+                            If rootElement IsNot Nothing Then
+                                RemoveHandler rootElement.DataContextChanged, AddressOf Me.DataContextChangedHandler
+                            End If
                         End If
                         Me.initialized = True
                         Exit Select
@@ -917,6 +927,23 @@ End Namespace
             End Function
 <#+             if (bindUniverse.RootElement.IsBindingFileRoot)#>
 <#+             {#>
+<#+                 if (bindUniverse.RootElement.Type.IsDerivedFromWindow())#>
+<#+                 {#>
+
+            Public Sub SubscribeToWindowActivated()
+                Dim weakBindings As New Global.System.WeakReference(Of <#=bindUniverse.BindingsClassName#>)(Me)
+                AddHandler Me.dataRoot.Activated, Sub(obj As Global.System.Object, data As <#=Globalize(KnownNamespaces.Xaml)#>.WindowActivatedEventArgs)
+                    Dim bindings As <#=bindUniverse.BindingsClassName#> = Nothing
+                    If weakBindings.TryGetTarget(bindings) Then
+                        bindings.Activated(obj, data)
+                    End If
+                End Sub
+            End Sub
+<#+                 }#>
+
+            Public Sub Activated(obj As Global.System.Object, data As <#=Globalize(KnownNamespaces.Xaml)#>.WindowActivatedEventArgs)
+                Me.Initialize()
+            End Sub
 
             Public Sub Loading(src As <#=Globalize(KnownNamespaces.Xaml)#>.FrameworkElement, data As object)
                 Me.Initialize()
@@ -1116,7 +1143,7 @@ End Namespace
 <#+                     if (step.IsTrackingSource && (step is PropertyStep || step is CastStep || step is RootStep) && step.ImplementsIObservableVector)#>
 <#+                     {#>
                 Public Sub VectorChanged_<#=step.CodeName#>(sender As Global.Windows.Foundation.Collections.IObservableVector(Of <#=step.ValueType.ItemType#>), e As Global.Windows.Foundation.Collections.IVectorChangedEventArgs)
-                    Dim bindings As <#=bindUniverse.BindingsClassName#> = Nothing
+                    Dim bindings As <#=bindUniverse.BindingsClassName#> = TryGetBindingObject()
                     If bindings IsNot Nothing Then
                         Dim obj As <#=step.ValueType#> = TryCast(sender, <#=step.ValueType#>)
 <#+                         Output_Update_Steps(step.ValueType.IsNullable, "bindings", step.TrackingSteps, false, "DATA_CHANGED");#>

@@ -16,7 +16,7 @@
 <#  else                                    #>
 <#  {                                       #>
 
-<#  if (!ProjectInfo.IsLibrary) #>
+<#  if (!ProjectInfo.IsLibrary && Model.AppMetadataProviderNamespace != null) #>
 <#  { #>
 Namespace <#=Globalize(Model.AppMetadataProviderNamespace)#>
 
@@ -446,24 +446,24 @@ Namespace <#=Globalize(ProjectInfo.XamlTypeInfoNamespace)#>
             If CreateFromStringMethod IsNot Nothing Then
                 Return CreateFromStringMethod.Invoke(input)
             ElseIf  Not _enumValues Is Nothing Then
-                Dim returnValue As Int32 = 0
+                Dim returnValue As Int64 = 0
 
                 Dim valueParts As String() = input.Split(New [Char]() {","c})
 
                 For Each valuePart As String In valueParts
                     Dim partValue As Global.System.Object = Nothing
-                    Dim enumFieldValue As Int32 = 0
+                    Dim enumFieldValue As Int64 = 0
                     Try
                         If _enumValues.TryGetValue(valuePart.Trim(), partValue) Then
-                            enumFieldValue = Convert.ToInt32(partValue)
+                            enumFieldValue = Convert.ToInt64(partValue)
                         Else
                             Try
-                                enumFieldValue = Convert.ToInt32(valuePart.Trim())
+                                enumFieldValue = Convert.ToInt64(valuePart.Trim())
                             Catch ex As FormatException
                                 For Each key As String In _enumValues.Keys
                                     If String.Compare(valuePart.Trim(), key, Global.System.StringComparison.OrdinalIgnoreCase) = 0 Then
                                         If _enumValues.TryGetValue(key.Trim(), partValue) Then
-                                            enumFieldValue = Convert.ToInt32(partValue)
+                                            enumFieldValue = Convert.ToInt64(partValue)
                                         End If
                                         Exit For
                                     End If
@@ -478,7 +478,7 @@ Namespace <#=Globalize(ProjectInfo.XamlTypeInfoNamespace)#>
                     End Try
                 Next valuePart
 
-                Return returnValue
+                Return Convert.ChangeType(returnValue, Global.System.Enum.GetUnderlyingType(UnderlyingType))
 
             End If
             Throw New ArgumentException(input, FullName)
@@ -995,10 +995,14 @@ End Namespace
             return <#=entry.DeclaringType.FullName#>.Get<#=entry.Name#>(instance)
 <#+                         }       #>
 <#+                     }           #>
-<#+                     else        #>
+<#+                     else if (entry.Name != "Template") #>
 <#+                     {           #>
             Dim that As <#=entry.DeclaringType.FullName#> = CType(instance, <#=entry.DeclaringType.FullName#>)
             Return that.<#=entry.Name#>
+<#+                     }           #>
+<#+                     else        #>
+<#+                     {           #>
+            Return Nothing
 <#+                     }           #>
         End Function
 <#+                 }                           #>
@@ -1016,7 +1020,7 @@ End Namespace
             <#=entry.DeclaringType.FullName#>.Set<#=entry.Name#>(instance, CType(Value, <#=entry.Type.FullName#>))
 <#+                         }                                        #>
 <#+                     }                       #>
-<#+                     else                    #>
+<#+                     else if (entry.Name != "Template")   #>
 <#+                     {                       #>
             Dim that As <#=entry.DeclaringType.FullName#> = CType(instance, <#=entry.DeclaringType.FullName#>)
             that.<#=entry.Name#> = CType(Value, <#=entry.Type.FullName#>)

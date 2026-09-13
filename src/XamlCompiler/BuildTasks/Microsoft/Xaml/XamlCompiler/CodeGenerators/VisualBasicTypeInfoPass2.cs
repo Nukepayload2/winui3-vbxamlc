@@ -39,7 +39,7 @@ namespace Microsoft.UI.Xaml.Markup.Compiler.CodeGen
   else                                    
   {                                       
             this.Write("\r\n");
-  if (!ProjectInfo.IsLibrary) 
+  if (!ProjectInfo.IsLibrary && Model.AppMetadataProviderNamespace != null) 
   { 
             this.Write("Namespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(Model.AppMetadataProviderNamespace)));
@@ -490,27 +490,28 @@ namespace Microsoft.UI.Xaml.Markup.Compiler.CodeGen
                     "eFromString(input))\r\n            End If\r\n\r\n            If CreateFromStringMethod" +
                     " IsNot Nothing Then\r\n                Return CreateFromStringMethod.Invoke(input)" +
                     "\r\n            ElseIf  Not _enumValues Is Nothing Then\r\n                Dim retur" +
-                    "nValue As Int32 = 0\r\n\r\n                Dim valueParts As String() = input.Split(" +
+                    "nValue As Int64 = 0\r\n\r\n                Dim valueParts As String() = input.Split(" +
                     "New [Char]() {\",\"c})\r\n\r\n                For Each valuePart As String In valuePar" +
                     "ts\r\n                    Dim partValue As Global.System.Object = Nothing\r\n       " +
-                    "             Dim enumFieldValue As Int32 = 0\r\n                    Try\r\n         " +
+                    "             Dim enumFieldValue As Int64 = 0\r\n                    Try\r\n         " +
                     "               If _enumValues.TryGetValue(valuePart.Trim(), partValue) Then\r\n   " +
-                    "                         enumFieldValue = Convert.ToInt32(partValue)\r\n          " +
+                    "                         enumFieldValue = Convert.ToInt64(partValue)\r\n          " +
                     "              Else\r\n                            Try\r\n                           " +
-                    "     enumFieldValue = Convert.ToInt32(valuePart.Trim())\r\n                       " +
+                    "     enumFieldValue = Convert.ToInt64(valuePart.Trim())\r\n                       " +
                     "     Catch ex As FormatException\r\n                                For Each key A" +
                     "s String In _enumValues.Keys\r\n                                    If String.Comp" +
                     "are(valuePart.Trim(), key, Global.System.StringComparison.OrdinalIgnoreCase) = 0" +
                     " Then\r\n                                        If _enumValues.TryGetValue(key.Tr" +
                     "im(), partValue) Then\r\n                                            enumFieldValu" +
-                    "e = Convert.ToInt32(partValue)\r\n                                        End If\r\n" +
+                    "e = Convert.ToInt64(partValue)\r\n                                        End If\r\n" +
                     "                                        Exit For\r\n                              " +
                     "      End If\r\n                                Next\r\n                            " +
                     "End Try\r\n                        End If\r\n\r\n                        returnValue =" +
                     " returnValue Or enumFieldValue\r\n\r\n                    Catch ex As Exception\r\n   " +
                     "                     Throw New ArgumentException(input, FullName)\r\n             " +
-                    "       End Try\r\n                Next valuePart\r\n\r\n                Return returnV" +
-                    "alue\r\n\r\n            End If\r\n            Throw New ArgumentException(input, FullN" +
+                    "       End Try\r\n                Next valuePart\r\n\r\n                Return Convert.ChangeType(" +
+                    "returnValue, Global.System.Enum.GetUnderlyingType(UnderlyingType))\r\n\r\n            End If\r" +
+                    "\n            Throw New ArgumentException(input, FullN" +
                     "ame)\r\n        End Function\r\n\r\n        \' ---- End of Interface Methods\r\n\r\n       " +
                     " Public Overrides ReadOnly Property IsReturnTypeStub() As Boolean\r\n            G" +
                     "et\r\n                Return _isReturnTypeStub\r\n            End Get\r\n        End P" +
@@ -1349,7 +1350,7 @@ this.Write("(instance)\r\n");
 
                          }       
                      }           
-                     else        
+                     else if (entry.Name != "Template")
                      {           
 this.Write("            Dim that As ");
 
@@ -1366,6 +1367,11 @@ this.Write(this.ToStringHelper.ToStringWithCulture(entry.Name));
 this.Write("\r\n");
 
                      }           
+                     else
+                     {
+this.Write("            Return Nothing\r\n");
+
+                     }
 this.Write("        End Function\r\n");
 
                  }                           
@@ -1418,7 +1424,7 @@ this.Write("))\r\n");
 
                          }                                        
                      }                       
-                     else                    
+                     else if (entry.Name != "Template")
                      {                       
 this.Write("            Dim that As ");
 
