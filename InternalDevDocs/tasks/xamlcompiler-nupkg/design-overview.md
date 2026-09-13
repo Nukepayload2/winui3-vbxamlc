@@ -1,6 +1,6 @@
 # 设计概览：仅编译器 nupkg
 
-把 fork 的 XAML 编译器二进制打成一个不含 targets / genxbf / 引用程序集的 nupkg，依赖原厂 targets 的空值守卫与 NuGet props 的导入时机，只替换三个工具路径属性。
+把 fork 的 XAML 编译器二进制打成一个不含 targets / genxbf / 引用程序集的 nupkg，依赖原厂 targets 的空值守卫与本包 props 的求值阶段（props 先于 targets），只替换三个工具路径属性。
 
 ## 只覆盖三个属性
 
@@ -16,7 +16,7 @@
 
 ## 导入顺序
 
-`Sdk.props` → `Microsoft.Common.props` → `obj\<proj>.nuget.g.props`（本包 props）→ … → `Sdk.targets` → `Microsoft.WindowsAppSDK.WinUI.targets` → `Microsoft.UI.Xaml.Markup.Compiler.targets:6` → `interop.targets:180-195` 的守卫块。本包赋值在前，守卫失效。
+`Sdk.props` → `Microsoft.Common.props` → `obj\<proj>.nuget.g.props`（本包 props）→ … → `Sdk.targets` → `Microsoft.WindowsAppSDK.WinUI.targets` → `Microsoft.UI.Xaml.Markup.Compiler.targets:6` → `interop.targets:180-195` 的守卫块。本包赋值在前，守卫失效。分界是 props 与 targets 两个求值阶段，不是 `nuget.g.props` 内各包 props 的先后 —— WinUI props 在第几行与胜负无关，直接引用与经别的包传递引用同理（见 D2、D6）。
 
 ## 载荷
 

@@ -74,7 +74,7 @@
 
 - `src/XamlCompiler/Targets/Microsoft.UI.Xaml.Markup.Compiler.interop.targets`：WinUI NuGet 自动导入，配置项目调编译器。
 - 语言传递：`XamlLanguage=$(XamlLanguage)`（默认 `$(Language)`）、`LanguageSourceExtension=$(DefaultLanguageSourceExtension)`。
-- 包形式：`Microsoft.UI.Xaml.Markup.Compiler.dll`（.NET Framework Task）+ `XamlCompiler.exe`（.NET Core 桥）；**可分发**：`build/xamlcompiler-nupkg/` 产出仅编译器 nupkg（id `Nukepayload2.UI.VBWinUI3.XamlCompiler`），下游经本地 feed 引用即完成三属性覆盖，见 `tasks/xamlcompiler-nupkg/`。
+- 包形式：`Microsoft.UI.Xaml.Markup.Compiler.dll`（.NET Framework Task）+ `XamlCompiler.exe`（.NET Core 桥）；**可分发**：`build/xamlcompiler-nupkg/` 产出仅编译器 nupkg（id `Nukepayload2.UI.VBWinUI3.XamlCompiler`），发布在 nuget.org 的 `3.0.0-dev*` 预发布线，引用后即完成三属性覆盖（被别的 nupkg 依赖时须 `PrivateAssets="none"`，见 `decisions.md` D6），见 `tasks/xamlcompiler-nupkg/`。
 
 ## 测试与验收
 

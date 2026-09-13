@@ -26,7 +26,7 @@
 | 判据 | 结果 |
 |------|------|
 | `obj\BatchFfmpegWinUI.vbproj.nuget.g.props` 含本包 props 的 Import | 第 17 行 |
-| 该行早于原厂 `Microsoft.WindowsAppSDK.WinUI.props` 的 Import 行 | 17 < 23 |
+| 本包 props 先于 `interop.targets:180-195` 的空值守卫求值（守卫在 targets 阶段，经 `Microsoft.WinUI.targets:116` → `Microsoft.UI.Xaml.Markup.Compiler.targets:6` 链入），与各包 props 在 `nuget.g.props` 中的相对行序无关 | 满足，故原厂 WinUI props 的行号不构成判据 |
 | `project.assets.json` 解析到 `Nukepayload2.UI.VBWinUI3.XamlCompiler/3.0.0-dev.260913.1` | 命中 |
 | 还原源含本地 `vbxamlc\PackageStore`（submodule） | 命中 |
 
@@ -90,6 +90,20 @@
 | 生成物 | `Public Module Program` / `Sub Main` 在位；48 处 `3.0.0.0` 戳 |
 | `input.json` / `output.json` | 不存在（in-proc `CompileXaml`，未走 `Exec`） |
 | 运行 | 窗口出现（hwnd 2956214），稳定存活 >12s |
+
+## E11 传递引用（本包被另一个 nupkg 依赖）
+
+打包工程把本包写成 `PrivateAssets="none"` 的依赖后打成 nupkg，再用只引该包 + `Microsoft.WindowsAppSDK` 2.2.0 的 VB WinUI 工程消费。
+
+| 判据 | 结果 |
+|------|------|
+| nuspec 依赖写成 `include="All"`（无 `exclude`） | 满足 |
+| 消费方 `ImportFrameworkWinFXTargets` | `true` |
+| 消费方 `XamlCompilerTaskPath` / `XamlCompilerExePath` | 本包 `tools\net8.0\` / `tools\net472\` |
+| 构建 | exit=0；生成 `Public Module Program` / `Sub Main` |
+| 运行 | 窗口出现（hwnd 2492432） |
+
+对照：同一打包工程若用默认 `PrivateAssets`，依赖写成 `exclude="Build,Analyzers"`，消费方三属性保持空值、静默改用原厂编译器 —— 这是该类封装的前提，见 D6。
 
 ## 未覆盖
 

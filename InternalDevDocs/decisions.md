@@ -4,7 +4,7 @@
 
 ## D1 交付机制 = 仅编译器 nupkg
 
-fork 的 XAML 编译器以仅编译器 nupkg（`Nukepayload2.UI.VBWinUI3.XamlCompiler`，只含 `tools\` 二进制 + 一个 `buildTransitive\` 覆盖载荷）交付，面向本地 feed，不发布 nuget.org。
+fork 的 XAML 编译器以仅编译器 nupkg（`Nukepayload2.UI.VBWinUI3.XamlCompiler`，只含 `tools\` 二进制 + 一个 `buildTransitive\` 覆盖载荷）交付，发布在 nuget.org 的 `3.0.0-dev*` 预发布线；本地 feed（`PackageStore`）只用于发布前自测。
 
 理由（已检查）：整包路线要求 `build/nuspecs/Microsoft.WindowsAppSDK.WinUI.nuspec:34-62` 的 `runtimes-framework/**`、`lib/**`、`include/**`，而 `BuildOutput/packaging/Release` 只有 `tools/` 与 `build/`，必须先全量构建整个仓库。
 
@@ -14,7 +14,7 @@ fork 的 XAML 编译器以仅编译器 nupkg（`Nukepayload2.UI.VBWinUI3.XamlCom
 
 只赋值 `XamlCompilerTaskPath` / `XamlCompilerJsonTaskPath` / `XamlCompilerExePath`，不带空值守卫；`_MuxPackageToolsFolder`、`GenXbfPath`、`XamlCompilerPropsAndTargetsDirectory` 不动；不设 `UseXamlCompilerExecutable`。
 
-理由（已检查/已运行）：原厂 `interop.targets:180-195` 三个属性带空值守卫，先赋值者获胜；带守卫会让原厂默认值先落地而覆盖失败。`_MuxPackageToolsFolder` 的 Core 分支无守卫且被 `GenXbfPath`（`:26`）依赖；`UseXamlCompilerExecutable` 在桌面 MSBuild 下为 true 是硬错误（`:375-376`）。导入时机：`obj\*.nuget.g.props:17` 早于 `:23`。
+理由（已检查/已运行）：原厂 `interop.targets:180-195` 三个属性带空值守卫，先赋值者获胜；带守卫会让原厂默认值先落地而覆盖失败。`_MuxPackageToolsFolder` 的 Core 分支无守卫且被 `GenXbfPath`（`:26`）依赖；`UseXamlCompilerExecutable` 在桌面 MSBuild 下为 true 是硬错误（`:375-376`）。导入时机：本包 props 在求值初期导入，守卫却在 targets 阶段（`Microsoft.WinUI.targets:116` → `Microsoft.UI.Xaml.Markup.Compiler.targets:6` → `interop.targets`），任何 props 赋值都先于守卫 —— 与本包 props 在 `nuget.g.props` 中的行序无关，与直接引用还是经别的包传递引用也无关（已运行：传递引用下三属性仍指向本包 `tools\`）。
 
 代价：消费方自设这三个属性会被静默改写。
 
@@ -37,3 +37,11 @@ fork 的 XAML 编译器以仅编译器 nupkg（`Nukepayload2.UI.VBWinUI3.XamlCom
 理由（已运行）：生成的 `Sub Main` 使工程不再需要 `StartupObject`/手写入口点；`Assembly.EntryPoint` 为 `BatchFfmpegWinUI.Program.Main`，运行验证通过。
 
 代价（已运行）：该示例不能再由原厂编译器构建——原厂 VB 生成器产出 `Public Class Program`，既无 `Sub Main`，也与注入的 `Program` 模块冲突（BC30179）。`-p:VBWinUI3XamlCompilerEnabled=false` 因此只用于比对生成源码。
+
+## D6 被别的 nupkg 依赖时必须 `PrivateAssets="none"`
+
+另一个 nupkg 把本包写成依赖时，该 `PackageReference` 必须带 `PrivateAssets="none"`；应用直接引用本包时不需要。
+
+理由（已运行）：`PrivateAssets` 默认值 `contentfiles;analyzers;build` 会让 NuGet 在 nuspec 依赖上写 `exclude="Build,Analyzers"`，消费方永远拿不到 `buildTransitive\` 里的 props —— 覆盖静默失效、退回原厂编译器且不报任何警告；显式 `none` 后依赖写成 `include="All"`，消费方三属性指向本包 `tools\`。`DevelopmentDependency=true` 不参与该判定：实测打包方照样把本包列为依赖。
+
+代价：包内没有 `lib\`，资产流向全靠这一个属性，写错不报错、只静默退回原厂。

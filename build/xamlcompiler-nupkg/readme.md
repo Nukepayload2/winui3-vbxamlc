@@ -18,7 +18,8 @@ assemblies keep coming from `Microsoft.WindowsAppSDK`; three properties are redi
 
 NuGet imports the props through `obj\<project>.nuget.g.props`, which is evaluated before the
 empty-value guards in the stock `Microsoft.UI.Xaml.Markup.Compiler.interop.targets`, so these
-assignments win.
+assignments win. Only that phase boundary matters: the guards live in a targets file and always run
+last, so the order of package props inside `nuget.g.props` is irrelevant.
 
 ## Usage
 
@@ -28,8 +29,14 @@ assignments win.
 </ItemGroup>
 ```
 
-`DevelopmentDependency=true` keeps the package private, so no `PrivateAssets` / `ExcludeAssets` are
-needed - adding them would also suppress the `buildTransitive` import that does the override.
+Referenced from an application, that is the whole integration: `DevelopmentDependency=true` keeps the
+package out of anything you pack, and the `buildTransitive` props still applies. Do not add
+`PrivateAssets` / `ExcludeAssets` here - they would suppress the import that does the override.
+
+Referenced from *another package*, the reference must be `PrivateAssets="none"`. The default
+(`contentfiles;analyzers;build`) makes NuGet stamp `exclude="Build,Analyzers"` on the dependency, so
+the consumer never imports the props and silently falls back to the stock compiler;
+`DevelopmentDependency=true` does not prevent that.
 
 To use the stock compiler instead:
 
