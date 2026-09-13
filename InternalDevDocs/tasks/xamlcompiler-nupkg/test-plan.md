@@ -46,7 +46,7 @@
 
 | # | 标记 | 结果 |
 |---|------|------|
-| 1 | `input.json` 与 `output.json` 同时存在 | 均在（102036 / 17795 字节） |
+| 1 | `input.json` 与 `output.json` 同时存在（仅 Core/Exec 路径产出） | 均在（102036 / 17795 字节） |
 | 2 | `App.g.i.vb` 含活动入口点 `Public Module Program` + `Sub Main` | 第 17 / 22 行 |
 | 3 | `App.g.i.vb` 含未编译的 DISABLE 钩子文本（`Friend Module XamlGeneratedProgram`、`Sub XamlGeneratedMain()`、`Friend Shared Sub XamlGeneratedCreateApplicationInstance()`），`App.g.vb` 含 `Private Shared Sub _XamlGeneratedCreateApplicationInstance()` + `Dim _application As New App()` | 第 37 / 41 / 66 行；`App.g.vb` 第 18 / 19 行 |
 | 4 | 生成文件戳 `" 3.0.0.0"`，无 `3.0.0.2606` | 命中（48 处 `3.0.0.0`，0 处 `3.0.0.2606`） |
@@ -79,9 +79,21 @@
 | 输出含三个 xbf | `App.xbf` 726 / `MainWindow.xbf` 9039 / `ProgressDialog.xbf` 1233 |
 | 运行的是 fork 产物 | obj 生成物戳 `3.0.0.0`，`Assembly.EntryPoint` = `BatchFfmpegWinUI.Program.Main` |
 
+## E10 桌面 MSBuild（Visual Studio）路径
+
+命令：`msbuild BatchFfmpegWinUI\BatchFfmpegWinUI.vbproj /p:Configuration=Debug /p:Platform=x64 /restore /m`（VS 18 的 MSBuild.exe）
+
+| 判据 | 结果 |
+|------|------|
+| 构建 | exit=0 |
+| 覆盖消息 | 三路径均在包的 `tools\net472\` 下（`$(MSBuildRuntimeType)` 非 Core 分支生效） |
+| 生成物 | `Public Module Program` / `Sub Main` 在位；48 处 `3.0.0.0` 戳 |
+| `input.json` / `output.json` | 不存在（in-proc `CompileXaml`，未走 `Exec`） |
+| 运行 | 窗口出现（hwnd 2956214），稳定存活 >12s |
+
 ## 未覆盖
 
-- 桌面 MSBuild / Visual Studio 路径（in-proc `CompileXaml`、net472 分支）。
+- 桌面 MSBuild 路径未做生成源码差分比对（只验证了构建 + 运行）。
 - demo 的 `ProgressDialog.xaml` 未交互式打开。
 - 手写入口点路径（`DISABLE_XAML_GENERATED_MAIN` + `XamlGeneratedProgram.XamlGeneratedMain()`）未在 demo 上验证；该路径由 fork 样本覆盖。
 - `-p:VBWinUI3XamlCompilerEnabled=false` 无法完成构建（见 E8），故不存在「同一源码在两套编译器下都能构建」的对照。

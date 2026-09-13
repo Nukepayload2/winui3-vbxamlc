@@ -95,7 +95,7 @@
 | VB 冒烟测试 | 在，但只断言文件数（已检查 `CodeGeneratorTests.cs`） |
 | VB 回归测试 | 全部 `[Ignore]`，项目已移除（已检查 `CodegenTests.cs` 与 `Tests/RegressionProjects/` 目录） |
 | VB test masters | 过时（UWP 命名空间），未随 WinUI3 迁移（已检查 `TestMasters/.../MainPage.g.vb`） |
-| 端到端验证 | 已完成（2026-09-12，已运行）：demo 仓库 `VbWinUI3Demos/BatchFfmpegWinUI` 经本地 feed 引用仅编译器 nupkg，构建 0 错误、窗口运行通过；对原厂编译器的差分构建仅入口点块与版本串有差异。详见 `tasks/xamlcompiler-nupkg/test-plan.md` |
+| 端到端验证 | 已完成（已运行）：demo 仓库 `VbWinUI3Demos/BatchFfmpegWinUI` 经 submodule 本地 feed 引用仅编译器 nupkg，`dotnet build`（Core/Exec）与桌面 MSBuild（VS，in-proc）两条路径均构建 0 错误、窗口运行通过；对原厂编译器的差分构建仅入口点块与版本串有差异。详见 `tasks/xamlcompiler-nupkg/test-plan.md` |
 | 已知 VB 特殊代码 | `CompileXaml.cs:264` TaskFileManager workaround、`CompileXamlInternal.cs:2472` CodeDom `"vb"`（已检查） |
 
 > 「微软做了一半」的具体含义 = 生成器写了大半且随 C# 同步，但回归基础设施（项目 + master）停在 UWP 时代且被剥离，端到端从未验证。接手目标 = 修好生成器输出可编译可运行的 VB + 重建回归测试与 master + 端到端验证 + 维持上游合并。

@@ -30,6 +30,7 @@
 | 生成物 | 活动入口点 `Public Module Program` / `Sub Main` 与未编译的 DISABLE 钩子文本齐备；戳 `3.0.0.0`，无 `3.0.0.2606` | 满足 |
 | 差分 | 与原厂编译器的差异仅入口点块与版本串 | 满足 |
 | 运行 | 窗口出现并稳定存活 | 满足 |
+| 桌面 MSBuild（VS） | 构建 + 运行通过；覆盖走 net472、无 `input.json`/`output.json`（in-proc 任务） | 满足（见 `test-plan.md` E10） |
 
 依据（已检查）：原厂 `interop.targets:180-195` 三个工具路径属性的空值守卫；`eng/usexamlcompiler.props:7-14`（Core 下指向 `..\tools\net8.0\`）与 `Samples/DisableXamlGeneratedMain/Vb/Vb.vbproj:35-37` 的同类路径覆盖先例。
 
@@ -43,6 +44,6 @@
 
 ## 未覆盖
 
-- 桌面 MSBuild / Visual Studio 路径未实测（验证走 `dotnet build`）。
+- 桌面 MSBuild 路径未做生成源码差分比对（只验证了构建 + 运行）。
 - demo 的 `ProgressDialog.xaml` 未交互式打开。
 - 未验证手写入口点路径（定义 `DISABLE_XAML_GENERATED_MAIN` + 调用 `XamlGeneratedProgram.XamlGeneratedMain()`）；该路径由 fork 样本 `Samples/DisableXamlGeneratedMain/{Vb,VbNoCtor}` 覆盖。
