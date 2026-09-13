@@ -1172,7 +1172,7 @@ this.Write("\r\n");
                          PopIndent(); 
                      } 
                  }
-                 foreach (var ba in element.BindAssignments.Where(bindAssignment => bindAssignment.IsTrackingTarget)) { 
+                 if (element.BindAssignments.Any(bindAssignment => bindAssignment.IsTrackingTarget)) { 
                      if (element.TwoWayBindAssignments.Any()) { 
 this.Write("                        Me.bindingsTracking.RegisterTwoWayListener_");
 
@@ -1642,10 +1642,10 @@ this.Write("_Bindings.StopTracking\r\n");
 
              if (bindUniverse.NeedsBindingsTracking)
              {
-this.Write("                Me.bindingsTracking.ReleaseAllListeners()\r\n");
+this.Write("                Me.bindingsTracking.ReleaseAllListeners()\r\n                Me.initialized = False\r\n");
 
              }
-this.Write("                Me.initialized = False\r\n            End Sub\r\n\r\n            Public" +
+this.Write("            End Sub\r\n\r\n            Public" +
         " Sub DisconnectUnloadedObject(connectionId As Integer) Implements I");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(Model.CodeInfo.ClassName.ShortName));

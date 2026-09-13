@@ -562,7 +562,7 @@ End Namespace
 <#+                         PopIndent(); #>
 <#+                     } #>
 <#+                 }#>
-<#+                 foreach (var ba in element.BindAssignments.Where(bindAssignment => bindAssignment.IsTrackingTarget)) { #>
+<#+                 if (element.BindAssignments.Any(bindAssignment => bindAssignment.IsTrackingTarget)) { #>
 <#+                     if (element.TwoWayBindAssignments.Any()) { #>
                         Me.bindingsTracking.RegisterTwoWayListener_<#=element.ConnectionId#>(<#=element.ReferenceExpression#>)
 <#+                     }#>
@@ -836,8 +836,8 @@ End Namespace
 <#+             if (bindUniverse.NeedsBindingsTracking)#>
 <#+             {#>
                 Me.bindingsTracking.ReleaseAllListeners()
-<#+             }#>
                 Me.initialized = False
+<#+             }#>
             End Sub
 
             Public Sub DisconnectUnloadedObject(connectionId As Integer) Implements I<#=Model.CodeInfo.ClassName.ShortName#>_Bindings.DisconnectUnloadedObject
