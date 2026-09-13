@@ -516,7 +516,7 @@ namespace Microsoft.UI.Xaml.Markup.Compiler.CodeGen
                     "et\r\n                Return _isReturnTypeStub\r\n            End Get\r\n        End P" +
                     "roperty\r\n\r\n        Public Overrides ReadOnly Property IsLocalType() As Boolean\r\n" +
                     "            Get\r\n                Return _isLocalType\r\n            End Get\r\n     " +
-                    "   End Property\r\n\r\n        Public ReadOnly Property BoxedType() As ");
+                    "   End Property\r\n\r\n        Public Overrides ReadOnly Property BoxedType() As ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.XamlMarkup)));
             this.Write(".IXamlType Implements ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.XamlMarkup)));

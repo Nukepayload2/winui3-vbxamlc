@@ -498,7 +498,7 @@ Namespace <#=Globalize(ProjectInfo.XamlTypeInfoNamespace)#>
             End Get
         End Property
 
-        Public ReadOnly Property BoxedType() As <#=Globalize(KnownNamespaces.XamlMarkup)#>.IXamlType Implements <#=Globalize(KnownNamespaces.XamlMarkup)#>.IXamlType.BoxedType
+        Public Overrides ReadOnly Property BoxedType() As <#=Globalize(KnownNamespaces.XamlMarkup)#>.IXamlType Implements <#=Globalize(KnownNamespaces.XamlMarkup)#>.IXamlType.BoxedType
             Get
                 Return _boxedType
             End Get
