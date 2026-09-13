@@ -68,16 +68,8 @@ build\xamlcompiler-nupkg\pack.cmd
 ## 5. 下游接线
 
 1. `PackageReference`：`Microsoft.WindowsAppSDK` 2.2.0（WinUI 子包解析为 2.2.1）+ `Nukepayload2.UI.VBWinUI3.XamlCompiler` 3.0.0-dev。不加 `PrivateAssets`/`ExcludeAssets`（会连 `buildTransitive` 导入一起掐掉）。
-2. 仓库根 `nuget.config`：加本地源 `..\vbwinui3\PackageStore`，不写 `<clear/>`。两仓非同级时用 `dotnet restore -p:RestoreAdditionalProjectSources=<绝对路径>`，不要用裸 `--source`（会替换全部源）。
-3. `DISABLE_XAML_GENERATED_MAIN` 用快照 + 条件拼接：
-
-```xml
-<_VBWinUI3DefineConstantsBefore>$(DefineConstants)</_VBWinUI3DefineConstantsBefore>
-<DefineConstants Condition="'$(_VBWinUI3DefineConstantsBefore)' == ''">DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-<DefineConstants Condition="'$(_VBWinUI3DefineConstantsBefore)' != ''">$(_VBWinUI3DefineConstantsBefore),DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-```
-
-直接写 `<DefineConstants>$(DefineConstants),DISABLE_XAML_GENERATED_MAIN</DefineConstants>` 会产生前导逗号，使 `FinalDefineConstants` 出现空常量名（BC31030）；两行同测 `$(DefineConstants)` 则第二行会读到第一行的结果，把常量加两次。
+2. 仓库根 `nuget.config`：加本地源 `vbxamlc\PackageStore`（demo 以 submodule 形式引入本仓库，路径 `vbxamlc`），不写 `<clear/>`。submodule 内的 `PackageStore` 是 git-ignored，clone 后需先打包；submodule 不在该位置时用 `dotnet restore -p:RestoreAdditionalProjectSources=<绝对路径>`，不要用裸 `--source`（会替换全部源）。
+3. 入口点由编译器生成（`Public Module Program` + `Sub Main`），不需要 `Program.vb`。只有要手写入口点时才定义 `DISABLE_XAML_GENERATED_MAIN` 并调用生成的 `XamlGeneratedProgram.XamlGeneratedMain()`。追加 `DefineConstants` 时用快照写法：直接写 `$(DefineConstants),X` 会产生前导逗号（`FinalDefineConstants` 空常量名 → BC31030），两行同测 `$(DefineConstants)` 则会把常量加两次。
 
 ## 6. 排查
 

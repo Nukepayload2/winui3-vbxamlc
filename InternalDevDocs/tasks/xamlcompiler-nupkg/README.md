@@ -26,8 +26,8 @@
 | nupkg | 条目与排除项见 `test-plan.md` | 满足 |
 | 导入顺序 | 本包 props 的导入行早于原厂 WinUI props | `obj\*.nuget.g.props:17` < `:23` |
 | 覆盖生效 | 日志含 `VBWinUI3 XamlCompiler override active:`，三路径在本包 `tools\` 下 | 满足 |
-| 编译 | `/define` 中 `DISABLE_XAML_GENERATED_MAIN` 一次、无空条目；无 BC31030 | 满足 |
-| 生成物 | 四个 fork 标记 + `3.0.0.0` 戳，无 `3.0.0.2606` | 满足 |
+| 编译 | `/define` 无空条目、无 BC31030；`DISABLE_XAML_GENERATED_MAIN` 未定义 | 满足（28 项，该常量 0 次） |
+| 生成物 | 活动入口点 `Public Module Program` / `Sub Main` 与未编译的 DISABLE 钩子文本齐备；戳 `3.0.0.0`，无 `3.0.0.2606` | 满足 |
 | 差分 | 与原厂编译器的差异仅入口点块与版本串 | 满足 |
 | 运行 | 窗口出现并稳定存活 | 满足 |
 
@@ -39,9 +39,10 @@
 2. 只覆盖 `XamlCompilerTaskPath` / `XamlCompilerJsonTaskPath` / `XamlCompilerExePath`，不带空值守卫；`_MuxPackageToolsFolder`、`GenXbfPath`、`XamlCompilerPropsAndTargetsDirectory` 不动；不设 `UseXamlCompilerExecutable`（`interop.targets:375-376`）。
 3. 只发 `buildTransitive\`；同时发 `build\` 会在直连引用时重复导入（MSB4011）。
 4. 包 id `Nukepayload2.UI.VBWinUI3.XamlCompiler`，默认版本 `3.0.0-dev`，可用 `-p:PackageVersion=` 覆盖。
+5. 下游默认使用生成的入口点：不定义 `DISABLE_XAML_GENERATED_MAIN`、不手写 `Program.vb`。代价是该示例不能再用原厂编译器构建（BC30179）。
 
 ## 未覆盖
 
 - 桌面 MSBuild / Visual Studio 路径未实测（验证走 `dotnet build`）。
-- demo 的 `Program.Main` 不调用生成的 `XamlGeneratedProgram.XamlGeneratedMain()`。
 - demo 的 `ProgressDialog.xaml` 未交互式打开。
+- 未验证手写入口点路径（定义 `DISABLE_XAML_GENERATED_MAIN` + 调用 `XamlGeneratedProgram.XamlGeneratedMain()`）；该路径由 fork 样本 `Samples/DisableXamlGeneratedMain/{Vb,VbNoCtor}` 覆盖。

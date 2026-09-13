@@ -29,3 +29,11 @@ fork 的 XAML 编译器以仅编译器 nupkg（`Nukepayload2.UI.VBWinUI3.XamlCom
 下游升级 Windows App SDK 遇到的 API 行为变化由消费方处理，不通过改生成器或打包更多原厂文件规避。
 
 理由（已运行）：例如 2.2.0 下 `Window.Title` getter 在窗口显示前抛 `E_FAIL` 导致 `0xC000027B`，该故障在原厂编译器构建下同样复现，与生成器无关。
+
+## D5 下游默认使用生成的入口点
+
+消费方不定义 `DISABLE_XAML_GENERATED_MAIN`、不手写 `Program.vb`：编译器生成的 `Public Module Program` + `Sub Main` 就是入口点（含 ComWrappers 初始化、同步上下文与 `New App()`）。`DISABLE_XAML_GENERATED_MAIN` 保留给需要接管入口点的场景。
+
+理由（已运行）：生成的 `Sub Main` 使工程不再需要 `StartupObject`/手写入口点；`Assembly.EntryPoint` 为 `BatchFfmpegWinUI.Program.Main`，运行验证通过。
+
+代价（已运行）：该示例不能再由原厂编译器构建——原厂 VB 生成器产出 `Public Class Program`，既无 `Sub Main`，也与注入的 `Program` 模块冲突（BC30179）。`-p:VBWinUI3XamlCompilerEnabled=false` 因此只用于比对生成源码。
