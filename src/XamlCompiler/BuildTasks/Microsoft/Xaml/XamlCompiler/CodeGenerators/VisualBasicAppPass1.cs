@@ -139,6 +139,15 @@ Namespace ");
             End Sub
 #End If
 
+#If Debug AndAlso Not DISABLE_XAML_GENERATED_RESOURCE_REFERENCE_DEBUG_OUTPUT Then
+        AddHandler Me.DebugSettings.XamlResourceReferenceFailed,
+            Sub(Sender As Global.System.Object, resourceReferenceFailedArgs As ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.Xaml)));
+            this.Write(@".XamlResourceReferenceFailedEventArgs)
+                Global.System.Diagnostics.Debug.WriteLine(resourceReferenceFailedArgs.Message)
+            End Sub
+#End If
+
 #If Debug AndAlso Not DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION Then
         AddHandler Me.UnhandledException,
             Sub(sender As Global.System.Object, unhandledExceptionArgs As ");

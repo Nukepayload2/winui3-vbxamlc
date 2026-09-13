@@ -1112,7 +1112,7 @@ this.Write("))\r\n");
                  }
                  else if (element.Type.IsDerivedFromControlTemplate()) 
                  {
-this.Write("                        Me.Update() \' Template children have been connected, init" +
+this.Write("                        Me.Initialize() \' Template children have been connected, init" +
         "ialize bindings\r\n");
 
                  }
@@ -1382,7 +1382,7 @@ this.Write(".IComponentConnector))\r\n                        End If\r\n        
 this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.XamlMarkup)));
 
 this.Write(@".IComponentConnector)
-                If elementWeakRefs.ContainsKey(connectionId) And elementWeakRefs(connectionId).IsAlive Then
+                If elementWeakRefs.ContainsKey(connectionId) AndAlso elementWeakRefs(connectionId).IsAlive Then
                     connector.Connect(connectionId, elementWeakRefs(connectionId).Target)
                 End If
             End Sub
@@ -1401,8 +1401,8 @@ this.Write(this.ToStringHelper.ToStringWithCulture(element.ConnectionId));
 this.Write(")\r\n");
 
                  }
-this.Write("\r\n                While unresolvedDependencies.Count > 0 And Not currentParent Is" +
-        " Nothing And currentParent.IsAlive\r\n                    Dim parentBindings As I");
+this.Write("\r\n                While unresolvedDependencies.Count > 0 AndAlso Not currentParent Is" +
+        " Nothing AndAlso currentParent.IsAlive\r\n                    Dim parentBindings As I");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(Model.CodeInfo.ClassName.ShortName));
 
@@ -1425,6 +1425,16 @@ this.Write(@"_BindingsScopeConnector)
 
 ");
 
+         } else { 
+this.Write("\r\n            ");
+this.Write(this.ToStringHelper.ToStringWithCulture(GeneratedCodeAttribute));
+this.Write("\r\n            ");
+this.Write(this.ToStringHelper.ToStringWithCulture(DebuggerNonUserCodeAttribute));
+this.Write("\r\n            Public Function GetBindingConnector(connectionId As Integer, target As Object) As ");
+this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.XamlMarkup)));
+this.Write(".IComponentConnector Implements ");
+this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.XamlMarkup)));
+this.Write(".IComponentConnector.GetBindingConnector\r\n                Return Nothing\r\n            End Function\r\n");
          } 
              if (bindUniverse.NeedsIDataTemplateExtension) 
              {
@@ -1450,7 +1460,7 @@ this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.Xam
 
 this.Write(".IDataTemplateExtension.ProcessBinding\r\n                Throw New Global.System.N" +
         "otImplementedException()\r\n            End Function\r\n\r\n            Public Functio" +
-        "n ProcessBindings(args As ContainerContentChangingEventArgs) As Integer Implemen" +
+        "n ProcessBindings(args As Global.Microsoft.UI.Xaml.Controls.ContainerContentChangingEventArgs) As Integer Implemen" +
         "ts ");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(Globalize(KnownNamespaces.Xaml)));
@@ -1752,7 +1762,7 @@ this.Write("                    Case Else\r\n                        Throw New G
         "  End Sub\r\n");
 
          }
-this.Write("\r\n            Public Function SetDataRoot(newDataRoot As Global.System.Object)\r\n");
+this.Write("\r\n            Public Function SetDataRoot(newDataRoot As Global.System.Object) As Boolean\r\n");
 
              if (bindUniverse.NeedsBindingsTracking)
              {
@@ -2527,9 +2537,9 @@ this.Write("\r\n");
                      }
                      else if (step.ImplementsINCC)
                      {
-this.Write("                            AddHandler DirectCast(obj, Global.System.Collections." +
-        "Specialized.INotifyCollectionChanged).CollectionChanged, AddressOf CollectionCha" +
-        "nged_");
+this.Write("                            AddHandler DirectCast(obj, ");
+this.Write(this.ToStringHelper.ToStringWithCulture(INCCInterfaceName(step)));
+this.Write(").CollectionChanged, AddressOf CollectionChanged_");
 
 this.Write(this.ToStringHelper.ToStringWithCulture(step.CodeName));
 

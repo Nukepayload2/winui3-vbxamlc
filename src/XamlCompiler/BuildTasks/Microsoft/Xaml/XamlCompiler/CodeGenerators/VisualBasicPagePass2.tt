@@ -534,7 +534,7 @@ End Namespace
 <#+                 }#>
 <#+                 else if (element.Type.IsDerivedFromControlTemplate()) #>
 <#+                 {#>
-                        Me.Update() ' Template children have been connected, initialize bindings
+                        Me.Initialize() ' Template children have been connected, initialize bindings
 <#+                 }#>
 <#+                 else#>
 <#+                 {#>
@@ -686,7 +686,7 @@ End Namespace
             End Sub
 
             Private Sub NotifyDependentScope(connectionId As Integer, connector As <#=Globalize(KnownNamespaces.XamlMarkup)#>.IComponentConnector)
-                If elementWeakRefs.ContainsKey(connectionId) And elementWeakRefs(connectionId).IsAlive Then
+                If elementWeakRefs.ContainsKey(connectionId) AndAlso elementWeakRefs(connectionId).IsAlive Then
                     connector.Connect(connectionId, elementWeakRefs(connectionId).Target)
                 End If
             End Sub
@@ -699,7 +699,7 @@ End Namespace
                 unresolvedDependencies.Add(<#=element.ConnectionId#>)
 <#+                 }#>
 
-                While unresolvedDependencies.Count > 0 And Not currentParent Is Nothing And currentParent.IsAlive
+                While unresolvedDependencies.Count > 0 AndAlso Not currentParent Is Nothing AndAlso currentParent.IsAlive
                     Dim parentBindings As I<#=Model.CodeInfo.ClassName.ShortName#>_BindingsScopeConnector = DirectCast(currentParent.Target, I<#=Model.CodeInfo.ClassName.ShortName#>_BindingsScopeConnector)
                     For i As Integer= unresolvedDependencies.Count - 1 To 0 Step -1
                         Dim unresolvedDependency As Integer = unresolvedDependencies(i)
@@ -713,6 +713,12 @@ End Namespace
                 End While
             End Sub
 
+<#+         } else { #>
+            <#=GeneratedCodeAttribute#>
+            <#=DebuggerNonUserCodeAttribute#>
+            Public Function GetBindingConnector(connectionId As Integer, target As Object) As <#=Globalize(KnownNamespaces.XamlMarkup)#>.IComponentConnector Implements <#=Globalize(KnownNamespaces.XamlMarkup)#>.IComponentConnector.GetBindingConnector
+                Return Nothing
+            End Function
 <#+         } #>
 <#+             if (bindUniverse.NeedsIDataTemplateExtension) #>
 <#+             {#>
@@ -729,7 +735,7 @@ End Namespace
                 Throw New Global.System.NotImplementedException()
             End Function
 
-            Public Function ProcessBindings(args As ContainerContentChangingEventArgs) As Integer Implements <#=Globalize(KnownNamespaces.Xaml)#>.IDataTemplateExtension.ProcessBindings
+            Public Function ProcessBindings(args As Global.Microsoft.UI.Xaml.Controls.ContainerContentChangingEventArgs) As Integer Implements <#=Globalize(KnownNamespaces.Xaml)#>.IDataTemplateExtension.ProcessBindings
                 Dim nextPhase As Integer = -1
                 ProcessBindings(args.Item, args.ItemIndex, CInt(args.Phase), nextPhase)
                 Return nextPhase
@@ -898,7 +904,7 @@ End Namespace
             End Sub
 <#+         }#>
 
-            Public Function SetDataRoot(newDataRoot As Global.System.Object)
+            Public Function SetDataRoot(newDataRoot As Global.System.Object) As Boolean
 <#+             if (bindUniverse.NeedsBindingsTracking)#>
 <#+             {#>
                 Me.bindingsTracking.ReleaseAllListeners()
@@ -1264,7 +1270,7 @@ End Namespace
 <#+                     }#>
 <#+                     else if (step.ImplementsINCC)#>
 <#+                     {#>
-                            AddHandler DirectCast(obj, Global.System.Collections.Specialized.INotifyCollectionChanged).CollectionChanged, AddressOf CollectionChanged_<#=step.CodeName#>
+                            AddHandler DirectCast(obj, <#=INCCInterfaceName(step)#>).CollectionChanged, AddressOf CollectionChanged_<#=step.CodeName#>
 <#+                     }#>
 <#+                     foreach (DependencyPropertyStep child in step.TrackingSteps.OfType<DependencyPropertyStep>())#>
 <#+                     {#>

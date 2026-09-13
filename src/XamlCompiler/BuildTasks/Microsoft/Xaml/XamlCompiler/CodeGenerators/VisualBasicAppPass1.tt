@@ -110,6 +110,13 @@ Partial Class <#=Model.CodeInfo.ClassName.ShortName#>
             End Sub
 #End If
 
+#If Debug AndAlso Not DISABLE_XAML_GENERATED_RESOURCE_REFERENCE_DEBUG_OUTPUT Then
+        AddHandler Me.DebugSettings.XamlResourceReferenceFailed,
+            Sub(Sender As Global.System.Object, resourceReferenceFailedArgs As <#=Globalize(KnownNamespaces.Xaml)#>.XamlResourceReferenceFailedEventArgs)
+                Global.System.Diagnostics.Debug.WriteLine(resourceReferenceFailedArgs.Message)
+            End Sub
+#End If
+
 #If Debug AndAlso Not DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION Then
         AddHandler Me.UnhandledException,
             Sub(sender As Global.System.Object, unhandledExceptionArgs As <#=Globalize(KnownNamespaces.Xaml)#>.UnhandledExceptionEventArgs)
